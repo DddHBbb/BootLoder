@@ -8,13 +8,16 @@
 #include "string.h"
 #include "sdio_sdcard.h"
 #include "IAP.h"
-uint8_t  AppData[1024*150]  __attribute__ ((at(0X20001000)));
-uint8_t *p1=AppData;
+#include <stdlib.h>
+#include "oled.h"
+
+	uint8_t  AppData[1024*150] __attribute__ ((at(0X20001000)));
+	uint8_t *p1=AppData;
 
 int main(void)
 {
 	u32 tt;
- 	u32 total,free;
+ 	u32 total;
 	uint32_t FileSize;
 	__IO uint32_t FlashAddr;
 
@@ -25,7 +28,9 @@ int main(void)
 	delay_init(180);                //初始化延时函数
 	uart_init(115200);              //初始化USART
 	KEY_Init();                     //初始化按键
+	OLED_Init();
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_RESET);
+//	*(p1+1024*150) = 27;
 
  	while(SD_Init())//检测不到SD卡
 	{
@@ -40,6 +45,7 @@ int main(void)
 		printf("未发现新固件=%d\r\n",f_open(file,(TCHAR*)"0:/Stethoscope.bin",FA_READ));
 		/* 关闭文件 */
 		f_close(file);
+		//free((void *)p1);
 		/* 卸载文件系统 */
 		f_mount(NULL,"0:", 0);
 	}	  
@@ -48,11 +54,13 @@ int main(void)
 		FileSize = f_size(file);
 		printf("size=%d\n\r",FileSize);
 		printf("开始更新固件...\r\n\r\n");
+		Show_String(16, 32, (uint8_t *)"Updating FirmWare");
+		OLED_Refresh_Gram();
 		printf("擦除中...\r\n\r\n");
 		delay_ms(100);	
 		while(1)
 		{
-			if(f_read(file, p1, 2048, &bw) != FR_OK)
+			if(f_read(file, (void *)p1, 2048, &bw) != FR_OK)
 			{
 					printf("fail");
 			}
@@ -68,6 +76,7 @@ int main(void)
 		printf("\r\n固件更新完成！！\r\n");
 		f_close(file);
 		f_unlink("0:/Stethoscope.bin");							/* 删除固件文件 */
+		OLED_Clear();
 		__set_FAULTMASK(1);												/* 关闭所有中断 */
 		NVIC_SystemReset();												/* 软件复位 */
 	}
