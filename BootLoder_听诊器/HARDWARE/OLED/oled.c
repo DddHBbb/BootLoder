@@ -264,7 +264,7 @@ void OLED_Init(void)
     OLED_WR_Byte(0xA4, OLED_CMD); //全局显示开启;bit0:1,开启;0,关闭;(白屏/黑屏)
     OLED_WR_Byte(0xA6, OLED_CMD); //设置显示方式;bit0:1,反相显示;0,正常显示
     OLED_WR_Byte(0xAF, OLED_CMD); //开启显示
-                                  //OLED_Clear();
+    OLED_Clear();
 }
 
 //在指定地址开始显示一个ASCII字符

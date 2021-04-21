@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include "oled.h"
 
-	uint8_t  AppData[1024*150] __attribute__ ((at(0X20001000)));
-	uint8_t *p1=AppData;
+uint8_t  AppData[1024*150] __attribute__ ((at(0X20001000)));
+uint8_t *p1=AppData;
 
 int main(void)
 {
@@ -30,6 +30,8 @@ int main(void)
 	KEY_Init();                     //初始化按键
 	OLED_Init();
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
+//	delay_ms(20);
 //	*(p1+1024*150) = 27;
 
  	while(SD_Init())//检测不到SD卡
@@ -48,7 +50,7 @@ int main(void)
 		//free((void *)p1);
 		/* 卸载文件系统 */
 		f_mount(NULL,"0:", 0);
-	}	  
+	}	   
 	else
 	{
 		FileSize = f_size(file);
@@ -83,6 +85,8 @@ int main(void)
 	tt = ((*(vu32*)(FLASH_APP1_ADDR+4))&0xFF000000);
 	printf("tt=%x\n\r",tt);
 	printf("&tt=%p\n\r",&tt);
+	OLED_Clear();
+//	INTX_DISABLE();
 	if(((*(__IO uint32_t*) (FLASH_APP1_ADDR + 4)) & 0xFF000000 ) == 0x8000000)//判断是否为0X08XXXXXX.
 	{	 
 		iap_load_app(FLASH_APP1_ADDR);//执行FLASH APP代码
